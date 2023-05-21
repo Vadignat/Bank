@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BankClient.iml" filepath="$PROJECT_DIR$/BankClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Bank.iml" filepath="$PROJECT_DIR$/Bank.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BankClient/BankClient.iml" filepath="$PROJECT_DIR$/BankClient/BankClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BankIO/BankIO.iml" filepath="$PROJECT_DIR$/BankIO/BankIO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BankServer/BankServer.iml" filepath="$PROJECT_DIR$/BankServer/BankServer.iml" />
     </modules>
   </component>
 </project>
