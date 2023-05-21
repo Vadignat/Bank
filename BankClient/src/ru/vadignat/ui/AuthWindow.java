@@ -4,7 +4,10 @@ import ru.vadignat.data.User;
 import ru.vadignat.net.Client;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.Console;
 import java.io.IOException;
 import java.sql.Date;
 
@@ -91,6 +94,7 @@ public class AuthWindow extends JFrame {
         );
         gl.linkSize(0, lblPhone, lblPassword);
         gl.linkSize(0, btnReg, btnAuth);
+
         btnReg.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -99,5 +103,18 @@ public class AuthWindow extends JFrame {
                 setVisible(false);
             }
         });
+
+
+        GroupLayout authgl = new GroupLayout(getContentPane());
+        btnAuth.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getContentPane().removeAll();
+                getContentPane().setLayout(authgl);
+                repaint();
+            }
+        });
+
+
     }
 }

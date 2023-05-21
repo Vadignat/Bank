@@ -179,6 +179,8 @@ public class RegWindow extends JFrame {
                     user.setPassword(tfPassword.getText());
                     try {
                         client.regUser(user);
+                        btnCancel.doClick();
+                        JOptionPane.showMessageDialog(RegWindow.this,"Регистрация прошла успешно!");
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
