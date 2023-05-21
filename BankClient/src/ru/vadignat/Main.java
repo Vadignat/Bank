@@ -10,6 +10,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             Client client = new Client("localhost",5003);
+            client.startReceiving();
             var w = new AuthWindow(client);
             w.setVisible(true);
         } catch (IOException e) {

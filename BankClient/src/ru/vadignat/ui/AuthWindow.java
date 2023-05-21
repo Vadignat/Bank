@@ -1,15 +1,14 @@
 package ru.vadignat.ui;
 
-import ru.vadignat.data.User;
+import ru.vadignat.data.UserVerifier;
 import ru.vadignat.net.Client;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.Console;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.sql.Date;
 
 public class AuthWindow extends JFrame {
     private static int MIN_SZ = GroupLayout.PREFERRED_SIZE;
@@ -22,8 +21,10 @@ public class AuthWindow extends JFrame {
     private JButton btnAuth;
     private JButton btnReg;
     private Client client;
+    private GroupLayout authgl;
     public AuthWindow(Client client){
         this.client = client;
+        client.setWindow(this);
         setSize(600,450);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         GroupLayout gl = new GroupLayout(getContentPane());
@@ -98,23 +99,48 @@ public class AuthWindow extends JFrame {
         btnReg.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                var rw=new RegWindow(AuthWindow.this, client);
+                var rw = new RegWindow(AuthWindow.this, client);
                 rw.setVisible(true);
                 setVisible(false);
             }
         });
 
 
-        GroupLayout authgl = new GroupLayout(getContentPane());
-        btnAuth.addActionListener(new ActionListener() {
+        authgl = new GroupLayout(getContentPane());
+        btnAuth.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                getContentPane().removeAll();
-                getContentPane().setLayout(authgl);
-                repaint();
+                String phone = tfPhone.getText();
+                String password = tfPassword.getText();
+                UserVerifier userVerifier = new UserVerifier(phone, password);
+                try {
+                    client.checkUser(userVerifier);
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage());
+                }
             }
         });
 
+        btnAuth.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    btnAuth.doClick();
+                }
+            }
+        });
 
+    }
+    public GroupLayout getAuthgl(){
+        return authgl;
+    }
+    public void changeLayout(GroupLayout gl){
+        getContentPane().removeAll();
+        getContentPane().setLayout(gl);
+        repaint();
+    }
+
+    public void showMessage(String msg) {
+        JOptionPane.showMessageDialog(this,msg);
     }
 }

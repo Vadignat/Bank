@@ -1,10 +1,9 @@
 package ru.vadignat.db;
 
+import com.lambdaworks.crypto.SCryptUtil;
 import ru.vadignat.data.User;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DBHelper {
     private Connection connection;
@@ -34,5 +33,19 @@ public class DBHelper {
         connection.commit();
     }
 
+    public boolean checkUser(String phone, String password) throws SQLException {
+        String sql = "SELECT `password` FROM `users` WHERE `phone` = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, phone);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return verifyPassword(password, rs.getString("password"));
+        }
+        return false;
+    }
+
+    private boolean verifyPassword(String password, String hashedPassword) {
+        return SCryptUtil.check(password, hashedPassword);
+    }
 
 }
