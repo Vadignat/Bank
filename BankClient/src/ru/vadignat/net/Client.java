@@ -39,7 +39,7 @@ public class Client
         switch (type) {
             case 1 ->{
                 if((boolean) data)
-                    window.changeLayout(window.getAuthgl());
+                    window.authorize();
                 else{
                     window.showMessage("Пользователя с таким номером телефона не существует или неправильно введен пароль");
                 }

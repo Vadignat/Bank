@@ -5,7 +5,6 @@ import ru.vadignat.net.Client;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -22,12 +21,26 @@ public class AuthWindow extends JFrame {
     private JButton btnReg;
     private Client client;
     private GroupLayout authgl;
+    private GroupLayout gl;
+    private JLabel lblName;
+    private JLabel lblCard;
+    private JLabel lblAccount;
+    private JButton btnCard;
+    private JButton btnAccount;
+    private JButton btnLogOut;
+    private JButton btnTransact;
+    private JList<String> cardList;
+    private JList<String> accountList;
+    private JScrollPane cardScrollPane;
+    private JScrollPane accountScrollPane;
+
     public AuthWindow(Client client){
         this.client = client;
         client.setWindow(this);
         setSize(600,450);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        GroupLayout gl = new GroupLayout(getContentPane());
+        gl = new GroupLayout(getContentPane());
         setLayout(gl);
         lblPhone = new JLabel("Номер телефона: ");
 
@@ -130,17 +143,85 @@ public class AuthWindow extends JFrame {
             }
         });
 
+
     }
     public GroupLayout getAuthgl(){
         return authgl;
     }
-    public void changeLayout(GroupLayout gl){
+    private void changeLayout(GroupLayout gl){
         getContentPane().removeAll();
         getContentPane().setLayout(gl);
         repaint();
     }
 
+    public void authorize() {
+        changeLayout(authgl);
+        lblName = new JLabel("ФИО");
+        lblCard = new JLabel("Мои карты");
+        lblAccount = new JLabel("Мои счета");
+        btnCard = new JButton("+");
+        btnAccount = new JButton("+");
+        btnTransact = new JButton("Перевести");
+        btnLogOut = new JButton("Выйти");
+
+        cardList = new JList<>(new String[]{"Карта 1", "Карта 2", "Карта 3", "fsd", "sdfa", "fsd", "fsd", "fsd", "fsd"});
+        accountList = new JList<>(new String[]{"Счет 1", "Счет 2", "Счет 3"});
+
+        cardScrollPane = new JScrollPane(cardList);
+        accountScrollPane = new JScrollPane(accountList);
+
+        authgl.setAutoCreateGaps(true);
+        authgl.setAutoCreateContainerGaps(true);
+
+        authgl.setHorizontalGroup(
+                authgl.createParallelGroup()
+                        .addGroup(authgl.createSequentialGroup()
+                                .addComponent(lblName)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnLogOut)
+                        )
+                        .addComponent(lblCard)
+                        .addGroup(authgl.createSequentialGroup()
+                                .addComponent(cardScrollPane, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnCard)
+                        )
+                        .addComponent(lblAccount)
+                        .addGroup(authgl.createSequentialGroup()
+                                .addComponent(accountScrollPane, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnAccount)
+                        )
+                        .addComponent(btnTransact)
+        );
+
+        authgl.setVerticalGroup(
+                authgl.createSequentialGroup()
+                        .addGroup(authgl.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(lblName)
+                                .addComponent(btnLogOut)
+                        )
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblCard)
+                        .addGroup(authgl.createParallelGroup()
+                                .addComponent(cardScrollPane, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                                .addComponent(btnCard)
+                        )
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblAccount)
+                        .addGroup(authgl.createParallelGroup()
+                                .addComponent(accountScrollPane, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                                .addComponent(btnAccount)
+                        )
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnTransact)
+        );
+    }
+
+
     public void showMessage(String msg) {
         JOptionPane.showMessageDialog(this,msg);
     }
+
+
 }
