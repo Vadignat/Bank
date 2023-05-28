@@ -35,6 +35,7 @@ public class RegWindow extends JFrame {
     public RegWindow(JFrame parent, Client client){
         this.client = client;
         setSize(600,450);
+        setLocationRelativeTo(null);
         GroupLayout gl = new GroupLayout(getContentPane());
         setLayout(gl);
         lblPhone = new JLabel("Номер телефона: ");

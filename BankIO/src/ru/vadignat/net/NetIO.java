@@ -3,7 +3,6 @@ package ru.vadignat.net;
 import java.io.*;
 import java.net.Socket;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class NetIO {
     private Socket s;
@@ -28,8 +27,9 @@ public class NetIO {
     public void startReceiving(BiFunction<Integer, Object, Void> parser) throws IOException, ClassNotFoundException {
         stop = false;
         while (!stop){
-            var ba = new byte[10240];
+            //var ba = new byte[10240];
             //var bat = s.getInputStream().readNBytes(4);
+            var ba = new byte[204888];
             s.getInputStream().read(ba);
             var ois = new ObjectInputStream(new ByteArrayInputStream(ba));
             var type = ois.readInt();

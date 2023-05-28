@@ -1,9 +1,14 @@
 package ru.vadignat.db;
 
 import com.lambdaworks.crypto.SCryptUtil;
+import ru.vadignat.data.Product;
+import ru.vadignat.data.Transfer;
 import ru.vadignat.data.User;
+import ru.vadignat.data.UserProduct;
 
 import java.sql.*;
+import java.time.Period;
+import java.util.ArrayList;
 
 public class DBHelper {
     private Connection connection;
@@ -33,19 +38,109 @@ public class DBHelper {
         connection.commit();
     }
 
-    public boolean checkUser(String phone, String password) throws SQLException {
-        String sql = "SELECT `password` FROM `users` WHERE `phone` = ?";
+    public User checkUser(String phone, String password) throws SQLException {
+        String sql = "SELECT * FROM `users` WHERE `phone` = ?";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setString(1, phone);
         ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            return verifyPassword(password, rs.getString("password"));
+        if (rs.next() && verifyPassword(password, rs.getString("password"))) {
+            User u = new User();
+            u.setPhone(phone);
+            u.setLastName(rs.getString("lastName"));
+            u.setFirstName(rs.getString("firstName"));
+            u.setMiddleName(rs.getString("middleName"));
+            u.setBirth(rs.getDate("birth"));
+            u.setPasswordHash(rs.getString("password"));
+            return u;
         }
-        return false;
+        return null;
     }
 
     private boolean verifyPassword(String password, String hashedPassword) {
         return SCryptUtil.check(password, hashedPassword);
+    }
+
+    public void doTransfer(Transfer t) throws SQLException{
+        String sql1 = "UPDATE `accounts` SET `balance` = `balance` - ? WHERE `accId` = ?";
+        String sql2 = "UPDATE `accounts` SET `balance` = `balance` + ? WHERE `accId` = ?";
+        connection.setAutoCommit(false);
+        var stmt1 = connection.prepareStatement(sql1);
+        stmt1.setFloat(1, t.getSum() + t.getFee());
+        stmt1.setString(2, t.getAccount1());
+        var stmt2 = connection.prepareStatement(sql2);
+        stmt2.setFloat(1, t.getSum());
+        stmt2.setString(2, t.getAccount2());
+
+        try {
+            stmt1.executeUpdate();
+            stmt2.executeUpdate();
+        }
+        catch (Exception e){
+            connection.rollback();
+            throw new SQLException();
+        }
+        connection.commit();
+    }
+
+    public ArrayList<Product> getProducts() throws SQLException {
+        String sql = "SELECT `type`, `productName`, `info` FROM `products`";
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        ArrayList<Product> products = new ArrayList<>();
+
+        while (rs.next()) {
+            Product product = new Product();
+            product.setType(rs.getInt("type"));
+            product.setProductName(rs.getString("productName"));
+            product.setInfo(rs.getString("info"));
+            products.add(product);
+        }
+
+        return products;
+    }
+
+
+    public Product getProduct(String productName) throws SQLException {
+        String sql = "SELECT `type`, `info` FROM `products` WHERE `productName` = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, productName);
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            Product product = new Product();
+            product.setProductName(productName);
+            product.setType(rs.getInt("type"));
+            product.setInfo(rs.getString("info"));
+            return product;
+        }
+        return null;
+    }
+
+    public boolean addProduct(User user, Product product) throws SQLException{
+        String sql = "INSERT INTO `accounts` (accId, userId, accName, balance, type)" +
+                " VALUES (?, ?, ?, 0, ?)";
+        connection.setAutoCommit(false);
+        var stmt = connection.prepareStatement(sql);
+        stmt.setString(1, createAccId(product.getType()));
+        stmt.setString(2, user.getPhone());
+        stmt.setString(3, product.getProductName());
+        stmt.setInt(4, product.getType());
+        try {
+            stmt.executeUpdate();
+        }
+        catch (Exception e){
+            connection.rollback();
+            return false;
+        }
+        connection.commit();
+        return true;
+    }
+
+    private String createAccId(int type)
+    {
+        if(type == 1)
+            return "1111 2222 3333 4446";
+        return "40817810099910004312";
     }
 
 }

@@ -1,12 +1,9 @@
 package ru.vadignat.net;
 
-import ru.vadignat.data.User;
-import ru.vadignat.data.UserVerifier;
+import ru.vadignat.data.*;
 import ru.vadignat.db.DBHelper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -41,16 +38,6 @@ public class ConnectedClient {
             }
         }).start();
     }
-
-    /*public void send(String userData) {
-        try {
-            byte[] dataBytes = userData.getBytes();
-            nio.sendData(dataBytes);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-     */
     public void send(int dataType, Object data) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -61,7 +48,7 @@ public class ConnectedClient {
     }
 
 
-    public Void parse(Integer type,Object data){
+    public Void parse(Integer type, Object data){
 
         switch (type)
         {
@@ -76,15 +63,53 @@ public class ConnectedClient {
             case 2 ->{
                 UserVerifier userVerifier = (UserVerifier) data;
                 try {
-                    boolean result = false;
-                    if(dbh.checkUser(userVerifier.getPhone(), userVerifier.getPassword()))
-                        result = true;
+                    User result = dbh.checkUser(userVerifier.getPhone(), userVerifier.getPassword());
                     try {
-                        send(1, result);
+                        send(2, result);
                     } catch (IOException e) {
                         System.out.println(e.getMessage());
                     }
                 } catch (SQLException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            case 3 ->{
+                Transfer t = (Transfer) data;
+                try {
+                    dbh.doTransfer(t);
+                } catch (SQLException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+
+            case 4 -> {
+                try {
+                    var products = dbh.getProducts();
+                    send(4, products);
+                } catch (SQLException | IOException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+
+            case 5->
+            {
+                try {
+                    String productName = (String) data;
+                    Product product = dbh.getProduct(productName);
+                    send(5, product);
+                } catch (SQLException | IOException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            case 6 ->
+            {
+                UserProduct up = (UserProduct) data;
+                try {
+                    if(dbh.addProduct(up.getUser(), up.getProduct()))
+                        send(6, true);
+                    else
+                        send(6, false);
+                } catch (SQLException | IOException e) {
                     System.out.println(e.getMessage());
                 }
             }

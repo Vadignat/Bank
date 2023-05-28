@@ -1,11 +1,14 @@
 package ru.vadignat.net;
 
+import ru.vadignat.data.Product;
 import ru.vadignat.data.User;
+import ru.vadignat.data.UserProduct;
 import ru.vadignat.data.UserVerifier;
 import ru.vadignat.ui.AuthWindow;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 
 public class Client
@@ -26,10 +29,8 @@ public class Client
         new Thread(()->{
             try {
                 nio.startReceiving(this::parse);
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 window.showMessage("Ошибка: " + e.getMessage());
-            } catch (ClassNotFoundException e) {
-                window.showMessage(e.getMessage());
             }
         }).start();
     }
@@ -37,38 +38,61 @@ public class Client
 
     public Void parse(Integer type, Object data){
         switch (type) {
-            case 1 ->{
-                if((boolean) data)
-                    window.authorize();
+            case 2 ->{
+                if((User) data != null)
+                    window.authorize((User) data);
                 else{
                     window.showMessage("Пользователя с таким номером телефона не существует или неправильно введен пароль");
+                }
+            }
+            case 4 -> {
+                ArrayList<Product> array = (ArrayList<Product>) data;
+                window.createAvailableProductsList(array);
+            }
+            case 5 ->
+            {
+                window.setChoosedProduct((Product) data);
+            }
+
+            case 6 ->
+            {
+                if((boolean) data){
+                    window.showMessage("Продукт успешно добавлен");
+                }
+                else{
+                    window.showMessage("Произошла ошибка при добавлении. Попробуйте еще раз");
                 }
             }
         }
         return null;
     }
-
-    public void regUser(User user) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream ous = new ObjectOutputStream(baos);
-        ous.writeInt(1);
-        ous.writeObject(user);
-        var ba = baos.toByteArray();
-        nio.sendData(ba);
-    }
-
-    public void checkUser(UserVerifier userVerifier) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream ous = new ObjectOutputStream(baos);
-        ous.writeInt(2);
-        ous.writeObject(userVerifier);
-        var ba = baos.toByteArray();
-        nio.sendData(ba);
-    }
-
     public void setWindow(AuthWindow window){
         this.window = window;
     }
+    public void sendData(int type, Serializable data) throws IOException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream ous = new ObjectOutputStream(baos);
+        ous.writeInt(type);
+        ous.writeObject(data);
+        var ba = baos.toByteArray();
+        nio.sendData(ba);
+    }
+    public void regUser(User user) throws IOException {
+        sendData(1, user);
+    }
 
+    public void checkUser(UserVerifier userVerifier) throws IOException {
+        sendData(2, userVerifier);
+    }
 
+    public void getProduct(String productName) throws IOException{
+        sendData(5, productName);
+    }
+
+    public void addProduct(User user, Product product) throws IOException{
+        UserProduct data = new UserProduct();
+        data.setUser(user);
+        data.setProduct(product);
+        sendData(6, data);
+    }
 }
