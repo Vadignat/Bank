@@ -6,6 +6,8 @@ public class Product implements Serializable{
     private int type;
     private String productName;
     private String info;
+    private float balance;
+    private String accId;
 
     public String getProductName() {
         return productName;
@@ -29,5 +31,21 @@ public class Product implements Serializable{
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public float getBalance() {
+        return balance;
+    }
+
+    public void setBalance(float balance) {
+        this.balance = balance;
+    }
+
+    public String getAccId() {
+        return accId;
+    }
+
+    public void setAccId(String accId) {
+        this.accId = accId;
     }
 }

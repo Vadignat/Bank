@@ -47,7 +47,7 @@ public class Client
             }
             case 4 -> {
                 ArrayList<Product> array = (ArrayList<Product>) data;
-                window.createAvailableProductsList(array);
+                window.createProductsList(array, window.getCardProducts(), window.getAccountProducts());
             }
             case 5 ->
             {
@@ -62,6 +62,11 @@ public class Client
                 else{
                     window.showMessage("Произошла ошибка при добавлении. Попробуйте еще раз");
                 }
+            }
+
+            case 7-> {
+                ArrayList<Product> array = (ArrayList<Product>) data;
+                window.createProductsList(array, window.getUserCardProducts(), window.getUserAccountProducts());
             }
         }
         return null;

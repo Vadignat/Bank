@@ -113,6 +113,16 @@ public class ConnectedClient {
                     System.out.println(e.getMessage());
                 }
             }
+            case 7 ->
+            {
+                User u = (User) data;
+                try {
+                    var products = dbh.getUserProducts(u.getPhone());
+                    send(7, products);
+                } catch (SQLException | IOException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
         }
         return null;
     }

@@ -143,4 +143,22 @@ public class DBHelper {
         return "40817810099910004312";
     }
 
+    public ArrayList<Product> getUserProducts(String userId) throws SQLException{
+        String sql = "SELECT * FROM `accounts` WHERE `userId` = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, userId);
+        ResultSet rs = stmt.executeQuery();
+        ArrayList<Product> products = new ArrayList<>();
+
+        while(rs.next()) {
+            Product product = new Product();
+            product.setProductName(rs.getString("accName"));
+            product.setType(rs.getInt("type"));
+            product.setBalance(rs.getFloat("balance"));
+            product.setAccId(rs.getString("accId"));
+            products.add(product);
+        }
+        return products;
+    }
+
 }
