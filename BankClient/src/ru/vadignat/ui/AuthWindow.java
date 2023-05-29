@@ -33,8 +33,6 @@ public class AuthWindow extends JFrame {
     private JButton btnTransferToAnother;
     private JButton btnCancel;
     private JButton btnAdd;
-    private JList<String> cardList;
-    private JList<String> accountList;
     private JList<String> availableCardList;
     private JList<String> availableAccountList;
     private JScrollPane availableCardPane;
@@ -59,6 +57,7 @@ public class AuthWindow extends JFrame {
     private ArrayList<Product> userAccountProducts;
     private List<String> userCardNames;
     private List<String> userAccountNames;
+
 
     public AuthWindow(Client client){
         this.client = client;
@@ -85,6 +84,7 @@ public class AuthWindow extends JFrame {
         } catch (IOException e) {
             showMessage(e.getMessage());
         }
+
 
         btnReg.addActionListener(new AbstractAction() {
             @Override
@@ -122,12 +122,6 @@ public class AuthWindow extends JFrame {
     }
 
     public void authorize(User user) {
-        try {
-            client.sendData(7, user);
-        } catch (IOException e) {
-            showMessage(e.getMessage());
-        }
-
         this.user = user;
         lblName = new JLabel(user.getLastName() + " " +  user.getFirstName() + " " + user.getMiddleName());
         lblCard = new JLabel("Мои карты");
@@ -137,28 +131,27 @@ public class AuthWindow extends JFrame {
         btnTransfer = new JButton("Перевести");
         btnLogOut = new JButton("Выйти");
 
-
-        initializeNames(userCardProducts, userCardNames);
-        initializeNames(userAccountProducts, userAccountNames);
-
-        initializeNamesJList(cardList, userCardNames);
-        initializeNamesJList(accountList, userAccountNames);
-
-        cardScrollPane = new JScrollPane(cardList);
-        accountScrollPane = new JScrollPane(accountList);
-
         btnSelfTransfer = new JButton("Перевод между своими счетами");
         btnTransferToAnother = new JButton("Перевод другому клиенту");
         btnCancel = new JButton("Отмена");
 
-        initializeNames(cardProducts, cardNames);
-        initializeNames(accountProducts, accountNames);
+        cardNames = initializeNames(cardProducts, cardNames);
+        accountNames = initializeNames(accountProducts, accountNames);
 
-        initializeNamesJList(availableCardList, cardNames);
-        initializeNamesJList(availableAccountList, accountNames);
+        availableCardList = initializeNamesJList(availableCardList, cardNames);
+        availableAccountList = initializeNamesJList(availableAccountList, accountNames);
 
+        userCardNames = initializeNames(userCardProducts, userCardNames);
+        userAccountNames = initializeNames(userAccountProducts, userAccountNames);
+
+        userCardList = initializeNamesJList(userCardList, userCardNames);
+        userAccountList = initializeNamesJList(userAccountList, userAccountNames);
+
+        cardScrollPane = new JScrollPane(userCardList);
+        accountScrollPane = new JScrollPane(userAccountList);
         availableCardPane = new JScrollPane(availableCardList);
         availableAccountPane = new JScrollPane(availableAccountList);
+
 
         lblProductName = new JLabel();
         txtProductDescription = new JTextArea();
@@ -219,14 +212,23 @@ public class AuthWindow extends JFrame {
         addProduct(availableAccountList);
     }
 
-    private void initializeNames(ArrayList<Product> array, List<String> names){
+    private void reloadUserProducts(){
+        try {
+            client.getUserProducts(user);
+        } catch (IOException e) {
+            showMessage(e.getMessage());
+        }
+    }
+    private List<String> initializeNames(ArrayList<Product> array, List<String> names){
         names = new ArrayList<>();
         for (Product p: array) {
             names.add(p.getProductName());
         }
+        return names;
     }
-    private void initializeNamesJList(JList<String> JListnames, List<String> names){
+    private JList<String> initializeNamesJList(JList<String> JListnames, List<String> names){
         JListnames = new JList<>(names.toArray(new String[0]));
+        return JListnames;
     }
     private void addProduct(JList<String> availableProductList) {
         availableProductList.addMouseListener(new MouseAdapter() {
@@ -251,28 +253,28 @@ public class AuthWindow extends JFrame {
 
     public void showMessage(String msg) {JOptionPane.showMessageDialog(this, msg);
     }
-    public void createProductsList(ArrayList<Product> products, ArrayList<Product> cardProducts, ArrayList<Product> accountProducts){
+    public void createProducts(ArrayList<Product> products){
         cardProducts = new ArrayList<>();
         accountProducts = new ArrayList<>();
         for (Product product:products
-             ) {
+        ) {
             if(product.getType() == 1)
                 cardProducts.add(product);
             else
                 accountProducts.add(product);
         }
     }
-    public ArrayList<Product> getCardProducts(){
-        return cardProducts;
-    }
-    public ArrayList<Product> getAccountProducts(){
-        return accountProducts;
-    }
-    public ArrayList<Product> getUserCardProducts(){
-        return userCardProducts;
-    }
-    public ArrayList<Product> getUserAccountProducts(){
-        return userAccountProducts;
+
+    public void createUserProducts(ArrayList<Product> products){
+        userCardProducts = new ArrayList<>();
+        userAccountProducts = new ArrayList<>();
+        for (Product product:products
+        ) {
+            if(product.getType() == 1)
+                userCardProducts.add(product);
+            else
+                userAccountProducts.add(product);
+        }
     }
     public void setChoosedProduct(Product product){
         choosedProduct = product;

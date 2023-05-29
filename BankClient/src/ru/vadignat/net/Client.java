@@ -39,20 +39,21 @@ public class Client
     public Void parse(Integer type, Object data){
         switch (type) {
             case 2 ->{
-                if((User) data != null)
-                    window.authorize((User) data);
+                User user = (User) data;
+                if(user != null)
+                {
+                    window.authorize(user);
+                }
                 else{
                     window.showMessage("Пользователя с таким номером телефона не существует или неправильно введен пароль");
                 }
             }
             case 4 -> {
                 ArrayList<Product> array = (ArrayList<Product>) data;
-                window.createProductsList(array, window.getCardProducts(), window.getAccountProducts());
+                window.createProducts(array);
             }
             case 5 ->
-            {
                 window.setChoosedProduct((Product) data);
-            }
 
             case 6 ->
             {
@@ -64,9 +65,10 @@ public class Client
                 }
             }
 
-            case 7-> {
+            case 7 ->
+            {
                 ArrayList<Product> array = (ArrayList<Product>) data;
-                window.createProductsList(array, window.getUserCardProducts(), window.getUserAccountProducts());
+                window.createUserProducts(array);
             }
         }
         return null;
@@ -99,5 +101,8 @@ public class Client
         data.setUser(user);
         data.setProduct(product);
         sendData(6, data);
+    }
+    public void getUserProducts(User user) throws IOException{
+        sendData(7, user);
     }
 }

@@ -139,8 +139,8 @@ public class DBHelper {
     private String createAccId(int type)
     {
         if(type == 1)
-            return "1111 2222 3333 4446";
-        return "40817810099910004312";
+            return "1111 2222 3333 " + "4440";
+        return "40817810099910004310";
     }
 
     public ArrayList<Product> getUserProducts(String userId) throws SQLException{

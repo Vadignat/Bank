@@ -65,6 +65,10 @@ public class ConnectedClient {
                 try {
                     User result = dbh.checkUser(userVerifier.getPhone(), userVerifier.getPassword());
                     try {
+                        if (result != null) {
+                            var products = dbh.getUserProducts(result.getPhone());
+                            send(7, products);
+                        }
                         send(2, result);
                     } catch (IOException e) {
                         System.out.println(e.getMessage());
@@ -115,8 +119,8 @@ public class ConnectedClient {
             }
             case 7 ->
             {
-                User u = (User) data;
                 try {
+                    User u = (User) data;
                     var products = dbh.getUserProducts(u.getPhone());
                     send(7, products);
                 } catch (SQLException | IOException e) {
