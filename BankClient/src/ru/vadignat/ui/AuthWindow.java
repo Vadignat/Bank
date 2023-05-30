@@ -10,6 +10,10 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
 public class AuthWindow extends JFrame {
     private static final int MIN_SZ = GroupLayout.PREFERRED_SIZE;
@@ -18,6 +22,7 @@ public class AuthWindow extends JFrame {
     private JLabel lblPassword;
     private JTextField tfPhone;
     private JTextField tfPassword;
+    private JTextField tfSum;
 
     private JButton btnAuth;
     private JButton btnReg;
@@ -25,6 +30,7 @@ public class AuthWindow extends JFrame {
     private JLabel lblName;
     private JLabel lblCard;
     private JLabel lblAccount;
+    private JLabel lblSum;
     private JButton btnCard;
     private JButton btnAccount;
     private JButton btnLogOut;
@@ -58,7 +64,8 @@ public class AuthWindow extends JFrame {
     private List<String> userCardNames;
     private List<String> userAccountNames;
 
-
+    private ActionListener tranferActionListener;
+    private ActionListener tranferActionListener2;
     public AuthWindow(Client client){
         this.client = client;
         client.setWindow(this);
@@ -67,12 +74,12 @@ public class AuthWindow extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         lblPhone = new JLabel("Номер телефона: ");
-
         lblPassword = new JLabel("Пароль: ");
+        lblSum = new JLabel("Сумма: ");
 
         tfPhone = new JTextField();
-
         tfPassword = new JTextField();
+        tfSum = new JTextField();
 
         btnAuth = new JButton("Войти");
         btnReg = new JButton("Регистрация");
@@ -159,6 +166,32 @@ public class AuthWindow extends JFrame {
 
         createAuthSuccessLayout();
 
+        DocumentFilter documentFilter = new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                // Проверка, соответствует ли вставляемая строка формату числа с плавающей точкой
+                if (isValidFloat(string)) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                // Проверка, соответствует ли заменяемая строка формату числа с плавающей точкой
+                if (isValidFloat(text)) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+
+            private boolean isValidFloat(String text) {
+                // Регулярное выражение для проверки формата числа с плавающей точкой
+                String floatRegex = "-?\\d*(\\.\\d{0,2})?";
+                return text.matches(floatRegex);
+            }
+        };
+        AbstractDocument document = (AbstractDocument) tfSum.getDocument();
+        document.setDocumentFilter(documentFilter);
+
         btnLogOut.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -168,10 +201,18 @@ public class AuthWindow extends JFrame {
             }
         });
 
-        btnTransfer.addActionListener(new ActionListener() {
+        tranferActionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 createChooseTransferLayout();
+            }
+        };
+        btnTransfer.addActionListener(tranferActionListener);
+
+        btnTransferToAnother.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createTransferToAnotherLayout();
             }
         });
 
@@ -493,7 +534,6 @@ public class AuthWindow extends JFrame {
     private void createChoosedProductLayout(){
         initializeGl();
 
-
         gl.setHorizontalGroup(
                 gl.createParallelGroup(GroupLayout.Alignment.CENTER)
                         .addGroup(gl.createSequentialGroup()
@@ -528,5 +568,86 @@ public class AuthWindow extends JFrame {
         );
     }
 
+    private void createTransferToAnotherLayout(){
+        initializeGl();
+
+        tfPhone.setText("");
+        gl.setHorizontalGroup(
+                gl.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addGroup(gl.createSequentialGroup()
+                                .addComponent(lblName)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)
+                                .addComponent(btnLogOut)
+                        )
+                        .addGroup(gl.createSequentialGroup()
+                                .addGap(8, 8, Integer.MAX_VALUE)
+                                .addGroup(gl.createParallelGroup()
+                                        .addComponent(lblPhone)
+                                        .addComponent(tfPhone)
+                                        .addComponent(lblCard)
+                                        .addComponent(cardScrollPane)
+                                        .addComponent(lblSum)
+                                        .addComponent(tfSum)
+                                        .addGroup(gl.createSequentialGroup()
+                                                .addGap(8, 8, Integer.MAX_VALUE)
+                                                .addComponent(btnCancel)
+                                                .addComponent(btnTransfer)
+                                                .addGap(8, 8, Integer.MAX_VALUE)
+                                        )
+                                )
+                                .addGap(8, 8, Integer.MAX_VALUE)
+                        )
+
+
+        );
+
+        gl.setVerticalGroup(
+                gl.createSequentialGroup()
+                        .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(lblName)
+                                .addComponent(btnLogOut)
+                        )
+                        .addGap(8, 8, Integer.MAX_VALUE)
+                        .addComponent(lblPhone)
+                        .addComponent(tfPhone, MIN_SZ, MIN_SZ, MIN_SZ)
+                        .addComponent(lblCard)
+                        .addComponent(cardScrollPane, MIN_SZ, MIN_SZ, MIN_SZ)
+                        .addComponent(lblSum)
+                        .addComponent(tfSum, MIN_SZ, MIN_SZ, MIN_SZ)
+                        .addGroup(gl.createParallelGroup()
+                                .addComponent(btnCancel)
+                                .addComponent(btnTransfer)
+                        )
+                        .addGap(10, 10, Integer.MAX_VALUE)
+
+        );
+
+        btnTransfer.removeActionListener(tranferActionListener);
+        tranferActionListener2 = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String phone = tfPhone.getText();
+                String msg = "";
+                float sum;
+                if(phone.equals("")){
+                    msg += "Заполните поле для номера телефона.\n";
+                }
+                if (!tfSum.getText().equals(""))
+                    try {
+                        sum = Float.parseFloat(tfSum.getText());
+                    }
+                    catch (NumberFormatException ex){
+                        showMessage(ex.getMessage());
+                    }
+                else{
+                    msg += "Введите сумму.\n";
+                }
+                if(!msg.equals("")){
+                    showMessage(msg);
+                }
+            }
+        };
+        btnTransfer.addActionListener(tranferActionListener2);
+    }
 
 }
