@@ -52,8 +52,10 @@ public class Client
                 ArrayList<Product> array = (ArrayList<Product>) data;
                 window.createProducts(array);
             }
-            case 5 ->
+            case 5 -> {
                 window.setChoosedProduct((Product) data);
+                window.chooseProduct();
+            }
 
             case 6 ->
             {

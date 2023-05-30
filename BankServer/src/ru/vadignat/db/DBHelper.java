@@ -136,11 +136,29 @@ public class DBHelper {
         return true;
     }
 
-    private String createAccId(int type)
-    {
-        if(type == 1)
-            return "1111 2222 3333 " + "4440";
-        return "40817810099910004310";
+    private String createAccId(int type) {
+        if (type == 1) {
+            return generateCardNumber();
+        }
+        return generateAccountNumber();
+    }
+
+    private String generateCardNumber() {
+        StringBuilder cardNumber = new StringBuilder("4444 2222 3333 ");
+        for (int i = 0; i < 4; i++) {
+            int randomDigit = (int) (Math.random() * 10);
+            cardNumber.append(randomDigit);
+        }
+        return cardNumber.toString();
+    }
+
+    private String generateAccountNumber() {
+        StringBuilder accountNumber = new StringBuilder("4081781009991000");
+        for (int i = 0; i < 4; i++) {
+            int randomDigit = (int) (Math.random() * 10);
+            accountNumber.append(randomDigit);
+        }
+        return accountNumber.toString();
     }
 
     public ArrayList<Product> getUserProducts(String userId) throws SQLException{

@@ -201,6 +201,18 @@ public class AuthWindow extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     client.addProduct(user, choosedProduct);
+                    if(choosedProduct.getType() == 1) {
+                        userCardProducts.add(choosedProduct);
+                        userCardNames.add(choosedProduct.getProductName());
+                        userCardList = initializeNamesJList(userCardList, userCardNames);
+                        cardScrollPane = new JScrollPane(userCardList);
+                    }
+                    else{
+                        userAccountList = initializeNamesJList(userAccountList, userAccountNames);
+                        userAccountProducts.add(choosedProduct);
+                        userAccountNames.add(choosedProduct.getProductName());
+                        accountScrollPane = new JScrollPane(userAccountList);
+                    }
                 } catch (IOException ex) {
                     showMessage(ex.getMessage());
                 }
@@ -210,15 +222,40 @@ public class AuthWindow extends JFrame {
         addProduct(availableCardList);
 
         addProduct(availableAccountList);
+
+        userCardList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    String selectedProduct = userCardList.getSelectedValue();
+                    for (Product p: userCardProducts) {
+                        if(p.getProductName().equals(selectedProduct)){
+                            lblProductName.setText(p.getProductName());
+                            txtProductDescription.setText("Номер счёта: " + p.getAccId() + "\nБаланс: " + p.getBalance());
+                            createChoosedProductLayout();
+                        }
+                    }
+                }
+            }
+        });
+
+        userAccountList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    String selectedProduct = userAccountList.getSelectedValue();
+                    for (Product p: userAccountProducts) {
+                        if(p.getProductName().equals(selectedProduct)){
+                            lblProductName.setText(p.getProductName());
+                            txtProductDescription.setText("Номер счёта: " + p.getAccId() + "\nБаланс: " + p.getBalance());
+                            createChoosedProductLayout();
+                        }
+                    }
+                }
+            }
+        });
     }
 
-    private void reloadUserProducts(){
-        try {
-            client.getUserProducts(user);
-        } catch (IOException e) {
-            showMessage(e.getMessage());
-        }
-    }
     private List<String> initializeNames(ArrayList<Product> array, List<String> names){
         names = new ArrayList<>();
         for (Product p: array) {
@@ -241,16 +278,17 @@ public class AuthWindow extends JFrame {
                     } catch (IOException ex) {
                         showMessage(ex.getMessage());
                     }
-                    if(choosedProduct != null){
-                        lblProductName.setText(choosedProduct.getProductName());
-                        txtProductDescription.setText(choosedProduct.getInfo());
-                        createChoosedProductLayout();
-                    }
                 }
             }
         });
     }
-
+    public void chooseProduct(){
+        if(choosedProduct != null){
+            lblProductName.setText(choosedProduct.getProductName());
+            txtProductDescription.setText(choosedProduct.getInfo());
+            createChoosedProductLayout();
+        }
+    }
     public void showMessage(String msg) {JOptionPane.showMessageDialog(this, msg);
     }
     public void createProducts(ArrayList<Product> products){
