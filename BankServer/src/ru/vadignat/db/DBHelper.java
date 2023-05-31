@@ -60,26 +60,56 @@ public class DBHelper {
         return SCryptUtil.check(password, hashedPassword);
     }
 
-    public void doTransfer(Transfer t) throws SQLException{
-        String sql1 = "UPDATE `accounts` SET `balance` = `balance` - ? WHERE `accId` = ?";
-        String sql2 = "UPDATE `accounts` SET `balance` = `balance` + ? WHERE `accId` = ?";
-        connection.setAutoCommit(false);
-        var stmt1 = connection.prepareStatement(sql1);
-        stmt1.setFloat(1, t.getSum() + t.getFee());
-        stmt1.setString(2, t.getAccount1());
-        var stmt2 = connection.prepareStatement(sql2);
-        stmt2.setFloat(1, t.getSum());
-        stmt2.setString(2, t.getAccount2());
+    public boolean doTransfer(Transfer t) throws SQLException{
+        String sql = "SELECT `accId`, `type` FROM `accounts` WHERE `userId` = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, t.getPhone2());
+        ResultSet rs = stmt.executeQuery();
+        boolean isAccFound = false;
+        while(rs.next()) {
+            if(rs.getInt("type") == 1){
+                if(t.getAccount2() == null)
+                    t.setAccount2(rs.getString("accId"));
+                isAccFound = true;
+                break;
+            }
+        }
 
-        try {
-            stmt1.executeUpdate();
-            stmt2.executeUpdate();
+        if(isAccFound) {
+            String sql3 = "SELECT `balance` FROM `accounts` WHERE `accId` = ?";
+            PreparedStatement stmt3 = connection.prepareStatement(sql3);
+            stmt3.setString(1, t.getAccount1());
+            ResultSet rs3 = stmt3.executeQuery();
+
+            if(rs3.next())
+                if(rs3.getFloat("balance") < t.getSum())
+                    return false;
+
+            String sql1 = "UPDATE `accounts` SET `balance` = `balance` - ? WHERE `accId` = ?";
+            String sql2 = "UPDATE `accounts` SET `balance` = `balance` + ? WHERE `accId` = ?";
+
+            connection.setAutoCommit(false);
+
+            var stmt1 = connection.prepareStatement(sql1);
+            stmt1.setFloat(1, t.getSum() + t.getFee());
+            stmt1.setString(2, t.getAccount1());
+            var stmt2 = connection.prepareStatement(sql2);
+            stmt2.setFloat(1, t.getSum());
+            stmt2.setString(2, t.getAccount2());
+
+            try {
+                stmt1.executeUpdate();
+                stmt2.executeUpdate();
+
+            } catch (Exception e) {
+                connection.rollback();
+            }
+
+            connection.commit();
+            return true;
         }
-        catch (Exception e){
-            connection.rollback();
-            throw new SQLException();
-        }
-        connection.commit();
+        return false;
+
     }
 
     public ArrayList<Product> getProducts() throws SQLException {

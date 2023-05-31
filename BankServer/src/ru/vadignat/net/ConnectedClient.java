@@ -80,8 +80,10 @@ public class ConnectedClient {
             case 3 ->{
                 Transfer t = (Transfer) data;
                 try {
-                    dbh.doTransfer(t);
-                } catch (SQLException e) {
+                    send(3, dbh.doTransfer(t));
+                    var products = dbh.getUserProducts(t.getPhone1());
+                    send(7, products);
+                } catch (SQLException | IOException e) {
                     System.out.println(e.getMessage());
                 }
             }

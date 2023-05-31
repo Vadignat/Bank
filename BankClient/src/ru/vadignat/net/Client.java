@@ -1,9 +1,6 @@
 package ru.vadignat.net;
 
-import ru.vadignat.data.Product;
-import ru.vadignat.data.User;
-import ru.vadignat.data.UserProduct;
-import ru.vadignat.data.UserVerifier;
+import ru.vadignat.data.*;
 import ru.vadignat.ui.AuthWindow;
 
 import java.io.*;
@@ -47,6 +44,14 @@ public class Client
                 else{
                     window.showMessage("Пользователя с таким номером телефона не существует или неправильно введен пароль");
                 }
+            }
+            case 3 ->{
+                if((boolean) data){
+                    window.showMessage("Перевод выполнен успешно.");
+                    window.createAuthSuccessLayout();
+                }
+                else
+                    window.showMessage("Произошла неизвестная ошибка при переводе. Попробуйте еще раз. Проверьте, что у вас достаточно средств.");
             }
             case 4 -> {
                 ArrayList<Product> array = (ArrayList<Product>) data;
@@ -106,5 +111,9 @@ public class Client
     }
     public void getUserProducts(User user) throws IOException{
         sendData(7, user);
+    }
+
+    public void doTransfer(Transfer t) throws IOException{
+        sendData(3, t);
     }
 }

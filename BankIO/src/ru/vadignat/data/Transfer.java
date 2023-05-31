@@ -7,6 +7,8 @@ import java.sql.Date;
 public class Transfer implements Serializable{
     private String account1;
     private String account2;
+    private String phone1;
+    private String phone2;
     private float sum;
     private float fee;
     private Date date;
@@ -50,5 +52,21 @@ public class Transfer implements Serializable{
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getPhone2() {
+        return phone2;
+    }
+
+    public void setPhone2(String phone2) {
+        this.phone2 = phone2;
+    }
+
+    public String getPhone1() {
+        return phone1;
+    }
+
+    public void setPhone1(String phone1) {
+        this.phone1 = phone1;
     }
 }
